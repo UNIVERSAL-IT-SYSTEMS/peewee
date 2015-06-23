@@ -2756,11 +2756,16 @@ class SelectQuery(Query):
         if self._dirty or not self._qr:
             model_class = self.model_class
             query_meta = self.get_query_meta()
+
+            naive_meta = self
+            if isinstance(self, CompoundSelect):
+                naive_meta = self.lhs
+
             if self._tuples:
                 ResultWrapper = TuplesQueryResultWrapper
             elif self._dicts:
                 ResultWrapper = DictQueryResultWrapper
-            elif self._naive or not self._joins or self.verify_naive():
+            elif naive_meta._naive or not naive_meta._joins or naive_meta.verify_naive():
                 ResultWrapper = NaiveQueryResultWrapper
             elif self._aggregate_rows:
                 ResultWrapper = AggregateQueryResultWrapper
